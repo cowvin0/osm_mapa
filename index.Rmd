@@ -1,0 +1,388 @@
+---
+title: Web Scraping TecGEO
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    theme: 
+      version: 4
+      font_scale: 1
+      bootswatch: journal
+      primary: "#2C3E50"
+      secondary: "#EB6864"
+    favicon: "img/logo.png"
+    navbar:
+      - { icon: "fa-link", href: "https://tecnologiageo.com.br/", align: right}
+      - { icon: "fa-instagram", href: "https://www.instagram.com/tecgeobr/", align: right}
+      - { icon: "fa-code", href: "https://tecnologiageo.com.br/", align: right}
+    options: (shiny.maxRequestSize = 700*1024^2)
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+options(shiny.autoreload = TRUE)
+options(gargle_oob_default = TRUE)
+library(flexdashboard)
+library(dplyr)
+library(fontawesome)
+library(leaflet.extras)
+library(reactable)
+
+mapa <- function(
+    df,
+    path = "~/Downloads/index.html",
+    save = FALSE){
+  dados <- df
+  casas <- dados |> dplyr::filter(startsWith(tipo, "casas"))
+  apartamentos <- dados |> dplyr::filter(tipo == "apartamentos")
+  terrenos <- dados |> dplyr::filter(startsWith(tipo, "terrenos"))
+  
+  reais_formato <- scales::dollar_format(prefix = "R$ ")
+  
+  loc <- c(mean(dados$latitude), mean(dados$longitude))
+  
+  mapa <- leaflet(dados) |> 
+    setView(lng = loc[2L], lat = loc[1L], zoom = 11L) 
+  
+  mapa <- 
+    mapa |> 
+    addTiles() |> 
+    addMarkers(
+      data = dados,
+      popup =
+        paste0(
+          "<b>ID: </b>", dados$id,"<br>",
+          "<b>Bairro: </b>", toupper(stringr::str_replace_all(dados$bairro, "_", " ")), "<br>",
+          #"<b>Endereço: </b>", toupper(dados$endereco), "<br>",
+          "<b>Zona: </b>", toupper(dados$zona), "<br>",
+          "<b>Tipo: </b>", toupper(dados$tipo),"<br>",
+          "<b>Valor Anunciado: </b>", reais_formato(dados$valor),"<br>",
+          #"<b>Valor Previsto: </b>", reais_formato(dados$.pred),"<br>",
+          "<b>Área: </b>", dados$area, " m²<br>",
+          "<b>Nº. de quartos: </b>", dados$quarto, "<br>",
+          "<b>Nº. de banheiros: </b>", dados$banheiro, "<br>",
+          "<b>Nº. de vagas: </b>", dados$vaga, "<br>",
+          "<b>Piscina: </b>", ifelse(dados$piscina, "Sim", "Não"), "<br>",
+          "<b>Elevador: </b>", ifelse(dados$elevador, "Sim", "Não"), "<br>",
+          "<b>Salão de Festa: </b>", ifelse(dados$salao_de_festa, "Sim", "Não"), "<br>",
+          "<b>Academia: </b>", ifelse(dados$academia, "Sim", "Não"), "<br>",
+          "<b>Playground: </b>", ifelse(dados$playground, "Sim", "Não"), "<br>",
+          "<b>Quadra de Esporte: </b>", ifelse(dados$quadra_de_esporte, "Sim", "Não"), "<br>",
+          "<b>Portaria 24h: </b>", ifelse(dados$portaria_24_horas, "Sim", "Não"), "<br>",
+          "<b>Varanda Gourmet: </b>", ifelse(dados$varanda_gourmet, "Sim", "Não"), "<br>",
+          "<b>Sauna: </b>", ifelse(dados$sauna, "Sim", "Não"), "<br>",
+          "<b>Spa: </b>", ifelse(dados$spa, "Sim", "Não")
+        ),
+      label = ~tipo,
+      group = "Agrupamento",
+      clusterOptions = markerClusterOptions(freezeAtZoom = FALSE)
+    ) |> 
+    addCircleMarkers(
+      data = dados,
+      radius = 4,
+      fillOpacity = 0.5, stroke = FALSE, 
+      popup = paste0(
+        "<b>ID: </b>", dados$id,"<br>",
+        "<b>Bairro: </b>", toupper(stringr::str_replace_all(dados$bairro, "_", " ")), "<br>",
+        #"<b>Endereço: </b>", toupper(dados$endereco), "<br>",
+        "<b>Zona: </b>", toupper(dados$zona), "<br>",
+        "<b>Tipo: </b>", toupper(dados$tipo),"<br>",
+        "<b>Valor Anunciado: </b>", reais_formato(dados$valor),"<br>",
+        #"<b>Valor Previsto: </b>", reais_formato(dados$.pred),"<br>",
+        "<b>Área: </b>", dados$area, " m²<br>",
+        "<b>Nº. de quartos: </b>", dados$quarto, "<br>",
+        "<b>Nº. de banheiros: </b>", dados$banheiro, "<br>",
+        "<b>Nº. de vagas: </b>", dados$vaga, "<br>",
+        "<b>Piscina: </b>", ifelse(dados$piscina, "Sim", "Não"), "<br>",
+        "<b>Elevador: </b>", ifelse(dados$elevador, "Sim", "Não"), "<br>",
+        "<b>Salão de Festa: </b>", ifelse(dados$salao_de_festa, "Sim", "Não"), "<br>",
+        "<b>Academia: </b>", ifelse(dados$academia, "Sim", "Não"), "<br>",
+        "<b>Playground: </b>", ifelse(dados$playground, "Sim", "Não"), "<br>",
+        "<b>Quadra de Esporte: </b>", ifelse(dados$quadra_de_esporte, "Sim", "Não"), "<br>",
+        "<b>Portaria 24h: </b>", ifelse(dados$portaria_24_horas, "Sim", "Não"), "<br>",
+        "<b>Varanda Gourmet: </b>", ifelse(dados$varanda_gourmet, "Sim", "Não"), "<br>",
+        "<b>Sauna: </b>", ifelse(dados$sauna, "Sim", "Não"), "<br>",
+        "<b>Spa: </b>", ifelse(dados$spa, "Sim", "Não")
+      ),
+      label = ~tipo,
+      group = "Todos"
+    ) |> 
+    addCircleMarkers(
+      data = casas,
+      radius = 4,
+      fillOpacity = 0.5, stroke = FALSE, 
+      popup = paste0(
+        "<b>ID: </b>", dados$id,"<br>",
+        "<b>Bairro: </b>", toupper(stringr::str_replace_all(casas$bairro, "_", " ")), "<br>",
+        #"<b>Endereço: </b>", toupper(dados$endereco), "<br>",
+        "<b>Zona: </b>", toupper(casas$zona), "<br>",
+        "<b>Tipo: </b>", toupper(casas$tipo),"<br>",
+        "<b>Valor Anunciado: </b>", reais_formato(casas$valor),"<br>",
+        #"<b>Valor Previsto: </b>", reais_formato(casas$.pred),"<br>",
+        "<b>Área: </b>", casas$area, " m²<br>",
+        "<b>Nº. de quartos: </b>", casas$quarto, "<br>",
+        "<b>Nº. de banheiros: </b>", casas$banheiro, "<br>",
+        "<b>Nº. de vagas: </b>", casas$vaga, "<br>",
+        "<b>Piscina: </b>", ifelse(casas$piscina, "Sim", "Não"), "<br>",
+        "<b>Elevador: </b>", ifelse(casas$elevador, "Sim", "Não"), "<br>",
+        "<b>Salão de Festa: </b>", ifelse(casas$salao_de_festa, "Sim", "Não"), "<br>",
+        "<b>Academia: </b>", ifelse(casas$academia, "Sim", "Não"), "<br>",
+        "<b>Playground: </b>", ifelse(casas$playground, "Sim", "Não"), "<br>",
+        "<b>Quadra de Esporte: </b>", ifelse(casas$quadra_de_esporte, "Sim", "Não"), "<br>",
+        "<b>Portaria 24h: </b>", ifelse(casas$portaria_24_horas, "Sim", "Não"), "<br>",
+        "<b>Varanda Gourmet: </b>", ifelse(casas$varanda_gourmet, "Sim", "Não"), "<br>",
+        "<b>Sauna: </b>", ifelse(casas$sauna, "Sim", "Não"), "<br>",
+        "<b>Spa: </b>", ifelse(casas$spa, "Sim", "Não")
+      ),
+      label = ~tipo,
+      group = "Casas"
+    ) |> 
+    addCircleMarkers(
+      data = apartamentos,
+      radius = 4,
+      fillOpacity = 0.5, stroke = FALSE, 
+      popup = paste0(
+        "<b>ID: </b>", dados$id,"<br>",
+        "<b>Bairro: </b>", toupper(stringr::str_replace_all(apartamentos$bairro, "_", " ")), "<br>",
+        #"<b>Endereço: </b>", toupper(dados$endereco), "<br>",
+        "<b>Zona: </b>", toupper(apartamentos$zona), "<br>",
+        "<b>Tipo: </b>", toupper(apartamentos$tipo),"<br>",
+        "<b>Valor Anunciado: </b>", reais_formato(apartamentos$valor),"<br>",
+        #"<b>Valor Previsto: </b>", reais_formato(apartamentos$.pred),"<br>",
+        "<b>Área: </b>", apartamentos$area, " m²<br>",
+        "<b>Nº. de quartos: </b>", apartamentos$quarto, "<br>",
+        "<b>Nº. de banheiros: </b>", apartamentos$banheiro, "<br>",
+        "<b>Nº. de vagas: </b>", apartamentos$vaga, "<br>",
+        "<b>Piscina: </b>", ifelse(apartamentos$piscina, "Sim", "Não"), "<br>",
+        "<b>Elevador: </b>", ifelse(apartamentos$elevador, "Sim", "Não"), "<br>",
+        "<b>Salão de Festa: </b>", ifelse(apartamentos$salao_de_festa, "Sim", "Não"), "<br>",
+        "<b>Academia: </b>", ifelse(apartamentos$academia, "Sim", "Não"), "<br>",
+        "<b>Playground: </b>", ifelse(apartamentos$playground, "Sim", "Não"), "<br>",
+        "<b>Quadra de Esporte: </b>", ifelse(apartamentos$quadra_de_esporte, "Sim", "Não"), "<br>",
+        "<b>Portaria 24h: </b>", ifelse(apartamentos$portaria_24_horas, "Sim", "Não"), "<br>",
+        "<b>Varanda Gourmet: </b>", ifelse(apartamentos$varanda_gourmet, "Sim", "Não"), "<br>",
+        "<b>Sauna: </b>", ifelse(apartamentos$sauna, "Sim", "Não"), "<br>",
+        "<b>Spa: </b>", ifelse(apartamentos$spa, "Sim", "Não")
+      ),
+      label = ~tipo,
+      group = "Apartamentos"
+    ) |> 
+    addCircleMarkers(
+      data = terrenos,
+      radius = 4,
+      fillOpacity = 0.5, stroke = FALSE, 
+      popup = paste0(
+        "<b>ID: </b>", dados$id,"<br>",
+        "<b>Bairro: </b>", toupper(stringr::str_replace_all(terrenos$bairro, "_", " ")), "<br>",
+        #"<b>Endereço: </b>", toupper(dados$endereco), "<br>",
+        "<b>Zona: </b>", toupper(terrenos$zona), "<br>",
+        "<b>Tipo: </b>", toupper(terrenos$tipo),"<br>",
+        "<b>Valor Anunciado: </b>", reais_formato(terrenos$valor),"<br>",
+        #"<b>Valor Previsto: </b>", reais_formato(apartamentos$.pred),"<br>",
+        "<b>Área: </b>", terrenos$area, " m²<br>",
+        "<b>Nº. de quartos: </b>", terrenos$quarto, "<br>",
+        "<b>Nº. de banheiros: </b>", terrenos$banheiro, "<br>",
+        "<b>Nº. de vagas: </b>", terrenos$vaga, "<br>",
+        "<b>Piscina: </b>", ifelse(terrenos$piscina, "Sim", "Não"), "<br>",
+        "<b>Elevador: </b>", ifelse(terrenos$elevador, "Sim", "Não"), "<br>",
+        "<b>Salão de Festa: </b>", ifelse(terrenos$salao_de_festa, "Sim", "Não"), "<br>",
+        "<b>Academia: </b>", ifelse(terrenos$academia, "Sim", "Não"), "<br>",
+        "<b>Playground: </b>", ifelse(terrenos$playground, "Sim", "Não"), "<br>",
+        "<b>Quadra de Esporte: </b>", ifelse(terrenos$quadra_de_esporte, "Sim", "Não"), "<br>",
+        "<b>Portaria 24h: </b>", ifelse(terrenos$portaria_24_horas, "Sim", "Não"), "<br>",
+        "<b>Varanda Gourmet: </b>", ifelse(terrenos$varanda_gourmet, "Sim", "Não"), "<br>",
+        "<b>Sauna: </b>", ifelse(terrenos$sauna, "Sim", "Não"), "<br>",
+        "<b>Spa: </b>", ifelse(terrenos$spa, "Sim", "Não")
+      ),
+      label = ~tipo,
+      group = "Terrenos"
+    ) |> 
+    addMeasure(
+      position = "topleft",
+      primaryLengthUnit = "meters",
+      secondaryLengthUnit = "kilometers",
+      primaryAreaUnit = "sqmeters",
+      completedColor = "red",
+      activeColor = "red"
+      
+    ) |> 
+    addScaleBar(
+      position = "bottomright",
+      options = scaleBarOptions(imperial = FALSE)
+    ) |> 
+    addMiniMap(
+      position = "topright",
+      tiles = providers$Esri.WorldStlreetMap,
+      toggleDisplay = TRUE,
+      minimized = FALSE
+    ) |> 
+    addResetMapButton() |> 
+    addProviderTiles(
+      "OpenStreetMap",
+      # give the layer a name
+      group = "OpenStreetMap"
+    ) |> 
+    addProviderTiles(
+      "Stamen.Toner",
+      group = "Stamen.Toner"
+    ) |> 
+    addProviderTiles(
+      "Stamen.Terrain",
+      group = "Stamen.Terrain"
+    ) |> 
+    addProviderTiles(
+      "Esri.WorldStreetMap",
+      group = "Esri.WorldStreetMap"
+    ) |> 
+    addProviderTiles(
+      "Wikimedia",
+      group = "Wikimedia"
+    ) |> 
+    addProviderTiles(
+      "CartoDB.Positron",
+      group = "CartoDB.Positron"
+    ) |> 
+    addProviderTiles(
+      "Esri.WorldImagery",
+      group = "Esri.WorldImagery"
+    ) |> 
+    # addLayersControl(baseGroups = c("Agrupamento","Todos","Casas", "Apartamentos", "Terrenos"), 
+    #                  options = layersControlOptions(collapsed = FALSE)) |> 
+    # add a layers control
+    addLayersControl(
+      baseGroups = c(
+        "OpenStreetMap", "Stamen.Toner",
+        "Stamen.Terrain", "Esri.WorldStreetMap",
+        "Wikimedia", "CartoDB.Positron", "Esri.WorldImagery"
+      ),
+      overlayGroups = c("Agrupamento","Todos","Casas", "Apartamentos", "Terrenos"),
+      # position it on the topleft
+      position = "topleft"
+    ) 
+  
+  if(save)
+    saveWidget(mapa, file = path)
+  
+  return(mapa)
+}
+
+```
+
+# Sobre {data-icon="fa-home"}
+
+
+```{r  eval=require('leaflet'), echo = FALSE}
+df_map <- reactive({leaflet() |>  
+  addMarkers(-34.8655664, -7.1214628) |> 
+  leaflet::addTiles() |> 
+  setView(
+  -34.8655664, -7.1214628, zoom = 27
+)})
+renderLeaflet({df_map()})
+```
+
+Row {data-width=full}
+-------------------------------------
+
+###
+```{r}
+    modalDialog(
+      title = NULL,
+      "Visualize esse dashboard pela tela de um computador. Você poderá enfrentar dificuldades para",
+      "visualizar e manipular alguns elementos, caso esteja utilizando um dispositivo móvel de tela pequena.",
+      "Nesses dispositivos, visualizar na horizontal poderá ajudar na renderização dos conteúdos.",
+      easyClose = FALSE,
+      footer = modalButton("Entendi")
+    )
+```
+
+
+Essa aplicação tem como objetivo facilitar a visualização dos dados raspados de imóveis anunciados em um detreminado município. Para tanto, ela irá funcionar com os arquivos no formato Comma Separated Values - CSV gerados pelo webscraping.
+ 
+**Algumas observação**:
+
+1 - Basta fazer o upload do arquivo CSV;
+
+2 - Você deve aguardar a renderização completa do mapa;
+
+3 - O mapa é produzido usando a biblioteca [**leaflet**](https://rstudio.github.io/leaflet/), da linguagem R e essa aplicação é construída usando a biblioteca [**shiny**](https://shiny.posit.co/) da linguagem R.
+
+Row {data-height=100}
+-------------------------------------
+
+# Carregar arquivo CSV {data-navmenu="Construir Mapa" data-icon="fa-database"}
+
+### `r fa("file-csv", fill = "darkblue")` Após o carregamento do CSV, aguarde até a renderização do mapa
+
+```{r   eval=require('leaflet'), echo = FALSE}
+library(spsComps)
+options(shiny.maxRequestSize=700*1024^2)
+
+
+dataset <- reactiveVal(NA)  # ReactiveVal para armazenar o conjunto de dados
+
+observeEvent(input$arquivo, {
+  data <- read.csv(input$arquivo$datapath)
+  dataset(data)  # Atualizar o reactiveVal com o novo conjunto de dados
+})
+
+fileInput(
+  "arquivo",
+  "",
+  buttonLabel = "Procure o CSV",
+  placeholder = "Nenhum arquivo selecionado",
+  accept = ".csv",
+  width = '100%'
+)
+
+loader1 <- addLoader$new(
+    target_selector = "m",
+    footer = h4("Aguarde alguns instantes ..."),
+    type = "ellipsis",
+    z_index = 1000
+)
+
+renderLeaflet({
+  tryCatch({
+    req(dataset())  # Verificar se o conjunto de dados está disponível
+    loader1$show()
+    on.exit(loader1$hide())
+    cat("Aguarde ...")
+    dados <- dataset()
+    mapa(dados)  # Renderizar o mapa
+  }, error = function(e) {
+    leaflet()  # Retornar um mapa vazio em caso de erro
+  })
+})
+```
+
+### `r fa("table", fill = "darkblue")` Tabela Resumo
+
+
+```{r}
+
+  renderReactable({
+  req(dataset())
+  dados <- dataset() |> 
+    dplyr::select(bairro, valor, area) |> 
+    group_by(bairro) |> 
+    summarise(valor_mediano = round(median(valor), 2L), valor_mediano_m2 = round(median(valor) / median(area), 2L), total = n()) |> 
+    filter(total > 10L)
+  
+  tab <- reactable(
+    dados,
+    filterable = TRUE,
+    defaultPageSize = 15L,
+    columns = list(
+        valor_mediano_m2 = colDef(
+          style = function(value) {
+            color <- ifelse(log(value) > median(log(dados$valor_mediano_m2)), "#f1625c", "#5cf1b4")
+            list(background = color)
+          }
+        )
+      )
+  )
+  tab
+})
+```
+
+

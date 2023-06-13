@@ -1,0 +1,11 @@
+name: osm_mapa
+title:
+username:
+account: pedro-rafael
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 9266386
+bundleId: 7317835
+url: https://pedro-rafael.shinyapps.io/osm_mapa/
+when: 1686167394.24517
+lastSyncTime: 1686167394.24518
