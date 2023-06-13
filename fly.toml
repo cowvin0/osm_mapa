@@ -1,0 +1,14 @@
+# fly.toml app configuration file generated for osmmapa on 2023-06-13T13:43:50-03:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "osmmapa"
+primary_region = "gru"
+
+[http_service]
+  internal_port = 3838
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
