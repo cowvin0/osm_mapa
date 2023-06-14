@@ -6,9 +6,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN install.r shiny rmarkdown flexdashboard dplyr fontawesome tippy rlang shinyWidgets shinyTime waiter \
     shinymanager shinyalert shinycssloaders glue shinyauthr leaflet htmlwidgets leaflet.extras \
-    classInt scales tidymodels spsComps reactable leaflet.extras
+    classInt scales tidymodels spsComps reactable leaflet.extras bspm
 
-RUN Rscript --vanilla -e 'install.packages("bspm", repos="https://cran.r-project.org")'
+RUN bspm::enable()
 
 RUN addgroup --system app && adduser --system --ingroup app app
 WORKDIR /home/prdm0/Dropbox/GitHub/osm_mapa/
