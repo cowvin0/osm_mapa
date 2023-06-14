@@ -8,7 +8,7 @@ RUN install.r shiny rmarkdown flexdashboard dplyr fontawesome tippy rlang shinyW
     shinymanager shinyalert shinycssloaders glue shinyauthr leaflet htmlwidgets leaflet.extras \
     classInt scales tidymodels spsComps reactable leaflet.extras bspm
 
-RUN bspm::enable()
+RUN Rscript -e 'bspm::enable()' 
 
 RUN addgroup --system app && adduser --system --ingroup app app
 WORKDIR /home/prdm0/Dropbox/GitHub/osm_mapa/
