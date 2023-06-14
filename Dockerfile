@@ -4,11 +4,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     pandoc \
     && rm -rf /var/lib/apt/lists/*
 
-RUN install.r shiny rmarkdown flexdashboard dplyr fontawesome tippy rlang shinyWidgets shinyTime waiter \
-    shinymanager shinyalert shinycssloaders glue shinyauthr leaflet htmlwidgets leaflet.extras \
-    classInt scales tidymodels spsComps reactable leaflet.extras bspm
-
-RUN Rscript -e 'bspm::enable()' 
+RUN install.r shiny rmarkdown flexdashboard dplyr fontawesome reactable leaflet.extras spsComps
 
 RUN addgroup --system app && adduser --system --ingroup app app
 WORKDIR /home/prdm0/Dropbox/GitHub/osm_mapa/
