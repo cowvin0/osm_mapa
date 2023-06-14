@@ -2,19 +2,20 @@ FROM eddelbuettel/r2u:20.04
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     pandoc \
-    python3-dbus \
     && rm -rf /var/lib/apt/lists/*
 
 RUN install.r shiny rmarkdown flexdashboard dplyr fontawesome tippy rlang shinyWidgets shinyTime waiter \
     shinymanager shinyalert shinycssloaders glue shinyauthr leaflet htmlwidgets leaflet.extras \
-    classInt scales tidymodels spsComps reactable leaflet.extras bspm
+    classInt scales tidymodels spsComps reactable leaflet.extras
+
+RUN Rscript --vanilla -e 'install.packages("bspm", repos="https://cran.r-project.org")'
 
 RUN addgroup --system app && adduser --system --ingroup app app
-WORKDIR /home/prdm0/Dropbox/GitHub/osm_mapa/ 
+WORKDIR /home/prdm0/Dropbox/GitHub/osm_mapa/
 COPY . .
 RUN chown app:app -R /home/app
 USER app
 
 EXPOSE 3838
 
-CMD ["R", "-e", "rmarkdown::run(shiny_args = list(port = 3838, host = '0.0.0.0'))"]
+CMD ["R", "-e", "options(bspm.sudo = TRUE); rmarkdown::run(shiny_args = list(port = 3838, host = '0.0.0.0'))"]
