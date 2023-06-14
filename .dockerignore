@@ -1,0 +1,6 @@
+# flyctl launch added from .gitignore
+**/.Rproj.user
+**/.Rhistory
+**/.RData
+**/.Ruserdata
+fly.toml
