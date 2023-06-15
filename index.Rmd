@@ -225,7 +225,11 @@ Column {.tabset .tabset-fade}
 ```{r}
 renderPlot({
   req(dataset())
-  dados <- dataset() |> dplyr::filter(tipo == input$tipoimovel)
-  visdat::vis_dat(dados)
-})
+  
+  if(is.null(input$tipoimovel)){
+    plot.new()
+  }else {
+    dados <- dataset() |> dplyr::filter(tipo == input$tipoimovel)
+    visdat::vis_dat(dados)
+  }})
 ```
