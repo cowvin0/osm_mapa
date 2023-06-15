@@ -18,4 +18,5 @@ USER app
 
 EXPOSE 3838
 
-CMD ["R", "-e", "rmarkdown::run(shiny_args = list(port = 3838, host = '0.0.0.0'))"]
+# Adiciona o comando ssh no final do CMD
+CMD R -e "rmarkdown::run(shiny_args = list(port = 3838, host = '0.0.0.0'));"
