@@ -29,13 +29,26 @@ library(reactable)
 library(mapview)
 library(stringr)
 library(leaflet)
-mapa2 <- function(df = NULL, imovel = NULL){
+
+mapa <- function(df = NULL, imovel = NULL){
   renomeando_tipos <- function(x)
     stringr::str_split(x, "_")[[1L]][1L]
   
-  if(is.null(df))
-    return(mapview()@map)
-
+  if(is.null(df)){
+    m <- data.frame(nome = "TecGeo", latitude = -7.1214628, longitude = -34.8655664) |> 
+      sf::st_as_sf(coords=c("longitude", "latitude"), crs = 4326) |> 
+      mapview::mapview()
+    
+    
+    m <- leafem::addLogo(m, "https://tecnologiageo.com.br/static/images/logo_tecgeo2.png",
+                    position = "bottomleft",
+                    offset.x = 50,
+                    offset.y = 250,
+                    width = 160,
+                    height = 100)
+    return(m)
+  }
+    
   tipos <- purrr::map_chr(.x = df$tipo, .f = renomeando_tipos)
   
   dados <- 
@@ -48,17 +61,26 @@ mapa2 <- function(df = NULL, imovel = NULL){
   if(!is.null(imovel)){
     dados <- 
       dados |> 
-      dplyr::filter(tipo == imovel, alpha = 0)
+      dplyr::filter(tipo == imovel)
     
     mapa <- dados |> 
-      mapview::mapview(al)
+      mapview::mapview()
   } else {
-    mapa <- dados |> 
+    mapa <- 
+      dados |> 
+      dplyr::filter(tipo == imovel) |> 
       mapview::mapview(legend = F, alpha = 0)
   }
   
-  return(mapa@map)
+  mapa <- leafem::addLogo(mapa, "https://tecnologiageo.com.br/static/images/logo_tecgeo2.png",
+                       position = "bottomleft",
+                       offset.x = 50,
+                       offset.y = 250,
+                       width = 160,
+                       height = 100)
+  return(mapa)
 }
+
 ```
 
 # Sobre {data-icon="fa-home"}
@@ -98,14 +120,29 @@ Essa aplicação tem como objetivo facilitar a visualização dos dados raspados
 
 2 - Você deve aguardar a renderização completa do mapa;
 
-3 - O mapa é produzido usando a biblioteca [**leaflet**](https://rstudio.github.io/leaflet/), da linguagem R e essa aplicação é construída usando a biblioteca [**shiny**](https://shiny.posit.co/) da linguagem R.
+3 - O mapa é produzido usando a biblioteca [**mapview**](https://r-spatial.github.io/mapview/), da linguagem R e essa aplicação é construída usando a biblioteca [**shiny**](https://shiny.posit.co/) da linguagem R.
+
+
+# Construir mapa pelo CSV {data-navmenu="Ferramentas" data-icon="fa-database"}
+
+
+Column {.sidebar}
+-----------------------------------------------------------------------
+
+```{r}
+selectInput(
+  inputId = 'tipoimovel',
+  label = 'Tipo de Imóvel',
+  choices = c("casas", "apartamentos", "flat", "terrenos"), 
+  selected = c("casas", "apartamentos", "flat", "terrenos")
+)
+```
 
 Row {data-height=100}
--------------------------------------
-
-# Carregar arquivo CSV {data-navmenu="Construir Mapa" data-icon="fa-database"}
+-----------------------------------------------------------------------
 
 ### `r fa("file-csv", fill = "darkblue")` Após o carregamento do CSV, aguarde até a renderização do mapa
+
 
 ```{r   eval=require('leaflet'), echo = FALSE}
 library(spsComps)
@@ -128,33 +165,22 @@ fileInput(
   width = '100%'
 )
 
-loader1 <- addLoader$new(
-    target_selector = "m",
-    footer = h4("Aguarde alguns instantes ..."),
-    type = "ellipsis",
-    z_index = 1000
-)
+# loader1 <- addLoader$new(
+#     target_selector = "m",
+#     footer = h4("Aguarde alguns instantes ..."),
+#     type = "ellipsis",
+#     z_index = 1000
+# )
 
 renderLeaflet({
-  # tryCatch({
-  #   req(dataset())  # Verificar se o conjunto de dados está disponível
-  #   loader1$show()
-  #   on.exit(loader1$hide())
-  #   cat("Aguarde ...")
-  #   dados <- dataset()
-  #   mapa2(dados)@map  # Renderizar o mapa
-  # }, error = function(e) {
-  #   mapview()@map  # Retornar um mapa vazio em caso de erro
-  # })
-  dados <- dataset()
   
   tryCatch(
     {
       req(dataset())
-      dados <- dataset()
-      mapa2(df = dados)
+      mapa(df = dataset(), imovel = input$tipoimovel)
+      
     }, error = function(e){
-      mapview()@map
+       mapa(df = NULL)
     }
   )})
 ```

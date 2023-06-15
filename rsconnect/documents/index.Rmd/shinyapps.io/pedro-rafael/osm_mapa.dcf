@@ -5,9 +5,9 @@ account: pedro-rafael
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 9266386
-bundleId: 7336291
+bundleId: 7350488
 url: https://pedro-rafael.shinyapps.io/osm_mapa/
-when: 1686604401.40407
-lastSyncTime: 1686604401.40408
+when: 1686847904.10621
+lastSyncTime: 1686847904.10622
 asMultiple: FALSE
 asStatic: FALSE
