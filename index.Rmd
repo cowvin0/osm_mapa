@@ -32,6 +32,7 @@ library(visdat)
 library(shinyWidgets)
 library(explore)
 library(plotly)
+library(vroom)
 
 mapa <- function(df = NULL, imovel = NULL){
   # renomeando_tipos <- function(x)
@@ -71,13 +72,12 @@ mapa <- function(df = NULL, imovel = NULL){
       mapview::mapview(legend = F, alpha = 0)
   }
   
-  mapa <- leafem::addLogo(mapa, "https://tecnologiageo.com.br/static/images/logo_tecgeo2.png",
+  leafem::addLogo(mapa, "https://tecnologiageo.com.br/static/images/logo_tecgeo2.png",
                        position = "bottomleft",
                        offset.x = 50,
                        offset.y = 250,
                        width = 180,
                        height = 100)
-  return(mapa)
 }
 
 ```
@@ -161,7 +161,7 @@ renomeando_tipos <- function(x)
     stringr::str_split(x, "_")[[1L]][1L]
 
 observeEvent(input$arquivo, {
-  data <- read.csv(input$arquivo$datapath)
+  data <- vroom::vroom(input$arquivo$datapath, show_col_types = FALSE)
   tipos <- purrr::map_chr(.x = data$tipo, .f = renomeando_tipos)
   data$tipo <- tipos
   dataset(data)  # Atualizar o reactiveVal com o novo conjunto de dados
