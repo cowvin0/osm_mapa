@@ -33,6 +33,30 @@ library(shinyWidgets)
 library(explore)
 library(plotly)
 library(vroom)
+library(xml2)
+library(rvest)
+library(cepR)
+library(abjutils)
+
+token <- "33efdb7230265c63c301ced1bc16370b"
+cep <- function(
+    endereco = "joao-pessoa,rua-francisco-cavalcan, joao pessoa, paraiba, brasil"){
+  
+  padronizando_string <- function(x){
+    stringr::str_split(string = abjutils::rm_accent(tolower(x)),
+                       pattern = "\\s+")[[1L]] |> paste0(collapse = "-")
+  }
+
+  url <- glue::glue(
+    "http://cep.la/{padronizando_string(x = endereco)}"
+  ) |> httr::GET()
+  
+  url <- xml2::read_html(url)
+
+  rvest::html_table(url)[[1L]][1,][[1L]] |> 
+    stringr::str_replace("-", "") |> 
+    cepR::busca_cep(token = token)
+}
 
 mapa <- function(df = NULL, imovel = NULL){
   # renomeando_tipos <- function(x)
@@ -79,7 +103,6 @@ mapa <- function(df = NULL, imovel = NULL){
                        width = 180,
                        height = 100)
 }
-
 ```
 
 # Sobre {data-icon="fa-home"}
@@ -123,7 +146,6 @@ Essa aplicação tem como objetivo facilitar a visualização dos dados raspados
 
 
 # Construir mapa pelo CSV {data-navmenu="Ferramentas" data-icon="fa-database"}
-
 
 Column {.sidebar}
 -----------------------------------------------------------------------
@@ -245,3 +267,54 @@ renderPlotly(
 )
 ```
 
+Row
+-------------------------------------
+
+# Buscar coordenadas e CEP pelo endereço {data-navmenu="Ferramentas" data-icon="fa-magnifying-glass"}
+
+```{r}
+textInput(inputId = "endereco", label = "Informe o Endereço", value = "Av. Juarez Távora, 522 - Torre, Empresarial Maximum, Sala 608. João Pessoa, PB - Brasil, CEP - 58040-020", width = NULL,
+  placeholder = NULL)
+
+tabela <- reactiveVal(NA)  # ReactiveVal para armazenar o conjunto de dados
+
+observeEvent(input$endereco, {
+  m <- cep(input$endereco)
+  tabela(m)# Atualizar o reactiveVal com o novo conjunto de dados
+})
+
+### Teste
+renderTable({
+  tryCatch(
+    {
+      tabela <- tabela()
+      tabela$latitude <- formatC(tabela$latitude, format = "f", digits = 15L)
+      tabela$longitude <- formatC(tabela$longitude, format = "f", digits = 15L)
+      tabela
+    }, error = function(e){
+      tabela <- cep("Av. Juarez Távora, 522 - Torre, Empresarial Maximum, Sala 608. João Pessoa, PB - Brasil, CEP - 58040-020")
+      tabela$latitude <- formatC(tabela$latitude, format = "f", digits = 15L)
+      tabela$longitude <- formatC(tabela$longitude, format = "f", digits = 15L)
+      tabela
+    }
+  )
+})
+```
+### Endereço no mapaa 
+```{r}
+renderLeaflet({
+    tryCatch(
+    {
+      req(tabela())
+      m <- tabela() |>  
+      sf::st_as_sf(coords=c("longitude", "latitude"), crs = 4326) |> 
+      mapview::mapview(legend = FALSE)
+      m@map
+    }, error = function(e){
+      m <- data.frame(nome = "TecGeo", latitude = -7.1214628, longitude = -34.8655664) |> 
+        sf::st_as_sf(coords=c("longitude", "latitude"), crs = 4326) |> 
+        mapview::mapview(legend = FALSE)
+      m@map
+    })
+})
+```
