@@ -35,3 +35,13 @@ workflowsets
 yardstick
 spsComps
 reactable
+mapview
+stringr
+visdat
+explore
+plotly
+vroom
+xml2
+rvest
+cepR
+abjutils

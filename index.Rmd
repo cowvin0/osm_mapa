@@ -17,6 +17,20 @@ output:
 runtime: shiny
 ---
 
+```{css}
+
+
+
+.shiny-output-area {
+  margin: 0;
+}
+
+.full-width-image {
+    width: 100vw; /* Define a largura igual à largura da janela do navegador */
+    height: auto; /* Mantém a proporção original da imagem */
+}
+```
+
 ```{r setup, include=FALSE}
 options(shiny.autoreload = TRUE)
 options(gargle_oob_default = TRUE)
@@ -59,9 +73,7 @@ cep <- function(
 }
 
 mapa <- function(df = NULL, imovel = NULL){
-  # renomeando_tipos <- function(x)
-  #   stringr::str_split(x, "_")[[1L]][1L]
-  
+
   if(is.null(df)){
     m <- data.frame(nome = "TecGeo", latitude = -7.1214628, longitude = -34.8655664) |> 
       sf::st_as_sf(coords=c("longitude", "latitude"), crs = 4326) |> 
@@ -79,8 +91,7 @@ mapa <- function(df = NULL, imovel = NULL){
   
   dados <- 
     df |> 
-    sf::st_as_sf(coords=c("longitude", "latitude"), crs = 4326) |> 
-    dplyr::select(-z_lat, -z_lon, -url, -bairro_completo) 
+    sf::st_as_sf(coords=c("longitude", "latitude"), crs = 4326)
   
   if(!is.null(imovel)){
     dados <- 
@@ -107,48 +118,31 @@ mapa <- function(df = NULL, imovel = NULL){
 
 # Sobre {data-icon="fa-home"}
 
-
-```{r  eval=require('leaflet'), echo = FALSE}
-df_map <- reactive({leaflet() |>
-  addMarkers(-34.8655664, -7.1214628) |>
-  leaflet::addTiles() |>
-  setView(
-  -34.8655664, -7.1214628, zoom = 27
-)})
-renderLeaflet({df_map()})
+```{r, fig.height=10, fig.align='center'}
+img(src = "img/principal.png",  class = "full-width-image")
 ```
 
-Row {data-width=full}
--------------------------------------
+## Row {data-width="full"}
 
-###
-```{r}
-    modalDialog(
-      title = NULL,
-      "Visualize esse dashboard pela tela de um computador. Você poderá enfrentar dificuldades para",
-      "visualizar e manipular alguns elementos, caso esteja utilizando um dispositivo móvel de tela pequena.",
-      "Nesses dispositivos, visualizar na horizontal poderá ajudar na renderização dos conteúdos.",
-      easyClose = FALSE,
-      footer = modalButton("Entendi")
-    )
+```{r fig.width=2}
+knitr::include_graphics("img/logo.png")
 ```
 
+Essa aplicação está sendo desenvolvida com a linguagem de programação [**R**](https://www.r-project.org/) e tem como objetivo evoluir para uma aplicação completa com recursos de visualização, descrição, modelagem e emissão de relatório automatizado de um imóvel, com base em algumas de suas características, levando em conta dados reais obtidos via [**web scraping**](https://en.wikipedia.org/wiki/Web_scraping) que são utilizados para o treinameto de um modelo de [**machine learning**](https://en.wikipedia.org/wiki/Machine_learning).
 
-Essa aplicação tem como objetivo facilitar a visualização dos dados raspados de imóveis anunciados em um detreminado município. Para tanto, ela irá funcionar com os arquivos no formato Comma Separated Values - CSV gerados pelo webscraping.
- 
+O modelo, que encontra-se em constante aprendizado, tem como objetivo estimar o valor do metro quadrado - $m^2$ com base em diversas caracrística do imóvel anunciado, sendo a sua geolocalização a principal característica. Entre outras características consideradas, pode-se citar a área, tipo do imóvel (apartamentos, casas, terrenos e flats), número de quartos, numero de banheiros, número de vagas de garagem, sendo essas variáveis numéricas. Também são consideras diversas outras dicotômicas (variáveis booleanas), que informa ao modelo a existência ou não de uma determinada característica no imóvel, como por exemplo, a existência ou não de elevador, piscina, salão de festa, academia, área de serviço, espaço gourmet, salão de festa, portaria, sauna, quadra poliesportiva, entre outras.
+
 **Algumas observação**:
 
-1 - Basta fazer o upload do arquivo CSV;
+1 - Essa aplicação está em constante evolução;
 
-2 - Você deve aguardar a renderização completa do mapa;
+2 - Alguns recursos disponíveis serão de maior interesse para quem está fazendo a modelagem e eventualmente poderão não fazer parte da aplicação final;
 
-3 - O mapa é produzido usando a biblioteca [**mapview**](https://r-spatial.github.io/mapview/), da linguagem R e essa aplicação é construída usando a biblioteca [**shiny**](https://shiny.posit.co/) da linguagem R.
-
+3 - Essa aplicação tem como objetivo utilizar a maior quantidade de recursos open source possíveis, visando confiabilidade e barateamento.
 
 # Construir mapa pelo CSV {data-navmenu="Ferramentas" data-icon="fa-database"}
 
-Column {.sidebar}
------------------------------------------------------------------------
+## Column {.sidebar}
 
 ```{r}
 # selectInput(
@@ -168,10 +162,9 @@ pickerInput(
 
 ```
 
-Row
--------------------------------------
-### `r fa("file-csv", fill = "darkblue")` Após o carregamento do CSV, aguarde até a renderização do mapa
+## Row
 
+### `r fa("file-csv", fill = "darkblue")` Após o carregamento do CSV, aguarde até a renderização do mapa
 
 ```{r   eval=require('leaflet'), echo = FALSE}
 library(spsComps)
@@ -209,8 +202,9 @@ renderLeaflet({
     }
   )})
 ```
-Column {.tabset .tabset-fade}
--------------------------------------
+
+## Column {.tabset .tabset-fade}
+
 ### `r fa("table", fill = "darkblue")`
 
 ```{r}
@@ -267,8 +261,7 @@ renderPlotly(
 )
 ```
 
-Row
--------------------------------------
+## Row
 
 # Buscar coordenadas e CEP pelo endereço {data-navmenu="Ferramentas" data-icon="fa-magnifying-glass"}
 
@@ -300,7 +293,9 @@ renderTable({
   )
 })
 ```
-### Endereço no mapaa 
+
+### Endereço no mapa
+
 ```{r}
 renderLeaflet({
     tryCatch(
