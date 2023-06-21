@@ -77,7 +77,6 @@ mapa <- function(df = NULL, imovel = NULL){
       sf::st_as_sf(coords=c("longitude", "latitude"), crs = 4326) |> 
       mapview::mapview()
     
-    
     m <- leafem::addLogo(m, "https://tecnologiageo.com.br/static/images/logo_tecgeo2.png",
                     position = "bottomleft",
                     offset.x = 50,
@@ -94,7 +93,8 @@ mapa <- function(df = NULL, imovel = NULL){
   if(!is.null(imovel)){
     dados <- 
       dados |> 
-      dplyr::filter(tipo == imovel)
+      dplyr::filter(tipo == imovel) |> 
+      dplyr::select(-url, -z_lat, -z_lon)
     
     mapa <- dados |> 
       mapview::mapview()
