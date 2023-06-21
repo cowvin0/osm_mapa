@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     pandoc \
     && rm -rf /var/lib/apt/lists/*
 
-RUN install.r shiny rmarkdown flexdashboard dplyr stringr vroom abjutils fontawesome cepR rvest xml2 reactable purrr explore plotly visdat shinyWidgets leafem sf leaflet leaflet.extras spsComps bspm mapview
+RUN install.r shiny rmarkdown flexdashboard dplyr wordcloud stringr vroom abjutils fontawesome cepR rvest xml2 reactable purrr explore plotly visdat shinyWidgets leafem sf leaflet leaflet.extras spsComps bspm mapview
 
 RUN addgroup --system app && adduser --system --ingroup app app
 
