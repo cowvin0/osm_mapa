@@ -5,6 +5,7 @@
 # Compilando imagem: docker build -t osm_mapa .
 # Rodando imagem: docker run --name osm_mapa --restart=unless-stopped -p 3838:3838 -d osm_mapa
 # Expondo a porta do localhost: ssh -o ServerAliveInterval=10 -R prdm0:80:localhost:3838 serveo.net
+# Expondo usando o ngrok: ngrok http 3838
 
 # No sistema operacional, para evitar queda da aplicação, criar o arquivo ~/.ssh/config com o código
 # Host *
@@ -18,7 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     pandoc \
     && rm -rf /var/lib/apt/lists/*
 
-RUN install.r shiny rmarkdown flexdashboard dplyr wordcloud stringr vroom abjutils fontawesome cepR rvest xml2 reactable purrr explore plotly visdat shinyWidgets leafem sf leaflet leaflet.extras spsComps bspm mapview
+RUN install.r shiny rmarkdown flexdashboard dplyr wordcloud stringr RColorBrewer vroom abjutils fontawesome cepR rvest xml2 reactable purrr explore plotly visdat shinyWidgets leafem sf leaflet leaflet.extras spsComps bspm mapview
 
 RUN addgroup --system app && adduser --system --ingroup app app
 

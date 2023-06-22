@@ -51,6 +51,7 @@ library(rvest)
 library(cepR)
 library(abjutils)
 library(wordcloud)
+library(RColorBrewer)
 
 token <- "33efdb7230265c63c301ced1bc16370b"
 cep <- function(
@@ -96,15 +97,24 @@ mapa <- function(df = NULL, imovel = NULL){
     dados <- 
       dados |> 
       dplyr::filter(tipo == imovel) |> 
-      dplyr::select(-url, -z_lat, -z_lon)
+      dplyr::select(-url, -z_lat, -z_lon) |> 
+      dplyr::mutate(metro_quadrado = valor/area)
+    
+    intervalos <- lattice::do.breaks(c(0, 20000), 12L)
     
     mapa <- dados |> 
-      mapview::mapview()
+      mapview::mapview(
+        alpha = 1,
+        zcol = "metro_quadrado",
+        col.regions=brewer.pal(length(intervalos), "Paired"),
+        at = intervalos,
+        layer.name = "Valor do metro quadrado"
+      )
   } else {
     mapa <- 
       dados |> 
       dplyr::filter(tipo == imovel) |> 
-      mapview::mapview(legend = F, alpha = 0)
+      mapview::mapview(alpha = 1)
   }
   
   leafem::addLogo(mapa, "https://tecnologiageo.com.br/static/images/logo_tecgeo2.png",
@@ -113,6 +123,39 @@ mapa <- function(df = NULL, imovel = NULL){
                        offset.y = 250,
                        width = 180,
                        height = 100)
+}
+
+mapa_palavras <- function(df, imovel = NULL, espectro = "metro_quadrado"){
+  
+  df <- 
+      df |>
+      mutate(metro_quadrado = valor/area)
+
+  
+  if (!is.null(imovel) && length(imovel) == 1L) {
+    freq <-
+      df |>
+      group_by(bairro) |>
+      dplyr::filter(tipo == imovel) |>
+      summarise(n = n(), media = mean(metro_quadrado))
+  } else {
+     freq <-
+      df |>
+      group_by(bairro) |>
+      summarise(n = n(), media = mean(metro_quadrado))
+  }
+  
+  if(espectro == "metro_quadrado")
+    valores <- freq$media
+  else
+    valores <- freq$n
+  
+  par(bg = "black")
+  wordcloud(
+    freq$bairro ,
+    valores,
+    col = terrain.colors(length(freq$bairro) , alpha = 0.9) ,
+    rot.per = 0.3)
 }
 ```
 
@@ -140,7 +183,7 @@ O modelo, que encontra-se em constante aprendizado, tem como objetivo estimar o 
 
 3 - Essa aplicação tem como objetivo utilizar a maior quantidade de recursos open source possíveis, visando confiabilidade e barateamento.
 
-# Construir mapa pelo CSV {data-navmenu="Ferramentas" data-icon="fa-database"}
+# Construir mapa pelo CSV {data-navmenu="Ferramentas" data-icon="fa-map-location-dot"}
 
 ## Column {.sidebar}
 
@@ -152,7 +195,6 @@ pickerInput(
     selected = c("casas", "apartamentos", "flat", "terrenos"),
     multiple = TRUE
   )
-
 ```
 
 ## Row {data-width=10000}
@@ -258,16 +300,17 @@ renderPlotly(
 ### `r fa("file-word", fill = "darkblack")`
 
 ```{r}
+pickerInput(
+    inputId = "espectro",
+    label = "",
+    choices = c("Pelo Valor do Metro Quadrado", "Pelo Número de Observações"),
+    selected = c("metro_quadrado", "observacoes"),
+    multiple = FALSE
+  )
+
 renderPlot({
   req(dataset())
-  
-  freq <- 
-  dataset() |> 
-  group_by(bairro) |> 
-  summarise(n = n())
-  par(bg="black") 
-  wordcloud(freq$bairro , freq$n , col=terrain.colors(length(freq$bairro) , alpha=0.9) , rot.per=0.3)
-  
+  mapa_palavras(df = dataset(), imovel = input$tipoimovel, espectro = input$espectro)
 })
 ```
 
@@ -283,7 +326,7 @@ tabela <- reactiveVal(NA)  # ReactiveVal para armazenar o conjunto de dados
 
 observeEvent(input$endereco, {
   m <- cep(input$endereco)
-  tabela(m)# Atualizar o reactiveVal com o novo conjunto de dados
+  tabela(m) # Atualizar o reactiveVal com o novo conjunto de dados
 })
 
 ### Teste
