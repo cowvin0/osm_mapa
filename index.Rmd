@@ -1,18 +1,20 @@
 ---
-title: Web Scraping TecGEO
+title: Predição Imobiliária
 output: 
   flexdashboard::flex_dashboard:
     theme: 
       version: 4
-      font_scale: 1
+      font_scale: 1.2
       bootswatch: journal
-      primary: "#2C3E50"
+      primary: "#0f385d"
       secondary: "#EB6864"
     favicon: "img/logo.png"
     navbar:
       - { icon: "fa-link", href: "https://tecnologiageo.com.br/", align: right}
+      - { icon: "fa-twitter", href: "https://twitter.com/tecgeobr", align: right}
+      - { icon: "fa-facebook", href: "https://www.facebook.com/tecnologiageo", align: right}
       - { icon: "fa-instagram", href: "https://www.instagram.com/tecgeobr/", align: right}
-      - { icon: "fa-code", href: "https://tecnologiageo.com.br/", align: right}
+      - { icon: "fa-linkedin", href: "https://www.linkedin.com/company/tecgeo/?originalSubdomain=br", align: right}
     options: (shiny.maxRequestSize = 700*1024^2)
 runtime: shiny
 ---
@@ -155,7 +157,7 @@ pickerInput(
 
 ## Row {data-width=10000}
 
-### `r fa("file-csv", fill = "darkblue")` Após o carregamento do CSV, aguarde até a renderização do mapa
+### `r fa("file-csv", fill = "darkblack")` Após o carregamento do CSV, aguarde até a renderização do mapa
 
 ```{r   eval=require('leaflet'), echo = FALSE}
 library(spsComps)
@@ -197,7 +199,7 @@ renderLeaflet({
 ## Column {.tabset .tabset-fade data-width=10000}
 ----------------------------------------------
 
-### `r fa("table", fill = "darkblue")`
+### `r fa("table", fill = "darkblack")`
 
 ```{r}
   renderReactable({
@@ -224,7 +226,7 @@ renderLeaflet({
 })
 ```
 
-### `r fa("binoculars", fill = "darkblue")`
+### `r fa("binoculars", fill = "darkblack")`
 
 ```{r}
 renderPlot({
@@ -238,7 +240,7 @@ renderPlot({
   }})
 ```
 
-### `r fa("chart-area", fill = "darkblue")`
+### `r fa("chart-area", fill = "darkblack")`
 
 ```{r}
 renderPlotly(
@@ -253,7 +255,7 @@ renderPlotly(
 )
 ```
 
-### `r fa("file-word", fill = "darkblue")`
+### `r fa("file-word", fill = "darkblack")`
 
 ```{r}
 renderPlot({
@@ -321,3 +323,69 @@ renderLeaflet({
     })
 })
 ```
+
+# Contatos {data-navmenu="Ajuda" data-icon="fa-phone-volume"}
+
+## Row {data-width="full"}
+
+```{r fig.width=3}
+knitr::include_graphics("img/aboutus.png")
+```
+
+#### Empresa
+
+<br>
+
+Há mais de 17 anos no mercado, a Tecgeo é uma empresa que oferece serviços de geoprocessamento e tecnologia da informação para todo o Brasil. Somos especialistas no desenvolvimento de diversas soluções que utilizam tecnologia e informação geoespacial para a Gestão da Informação Inteligente em empresas públicas e privadas. 
+
+<br>
+
+#### Contatos 
+
+<br>
+
+- `r fa("envelope-open-text", fill = "darkblack")` contato@tecnologiageo.com.br
+
+- `r fa("phone-volume", fill = "darkblack")` +55 (83) 3244-7755 
+
+- `r fa("map-location-dot", fill = "darkblack")` Av. Juarez Távora, 522 - Torre, Empresarial Maximum, Sala 608. João Pessoa, PB - Brasil, CEP - 58040-020 
+
+# Informações {data-navmenu="Ajuda" data-icon="fa-info"}
+
+#### Informações gerais e materiais
+
+<br>
+
+```{r fig.width=5}
+knitr::include_graphics("img/aboutus.png")
+```
+
+<br>
+
+A aprendizagem de máquina é um campo da inteligência artificial que se concentra no desenvolvimento de algoritmos e técnicas que permitem que os sistemas computacionais aprendam e melhorem automaticamente a partir dos dados. Ela envolve o uso de modelos estatísticos e algoritmos para capacitar os computadores a identificar padrões, tomar decisões e realizar tarefas específicas sem serem explicitamente programados para cada passo.
+
+Essa aplicação faz uso de técnicas estatísticas e utiliza-se de algoritmos de aprenziagem de máquina para a previsão do valor do metro quadrado de imóveis de uma dada região geográficas. O algoritmo é treinado periodicamente com dados reais de anuncios de imóveis, cujos os dados são obtidos por meio de web scraping, que trata-se de raspagem de dados de sites de anuncios imobiliários.
+
+<br>
+
+```{r fig.width=6, fig.align='center'}
+knitr::include_graphics("img/gif.webp")
+```
+
+<br>
+
+A animação acima demonstra o procedimento de treinamento de um modelo supervisionado de aprendizagem de máquina, partindo do tratamento e limpeza dos dados que posteriormente é divido em conjunto de treinamento e teste, em que sob o conjunto de treinamento o modelo será treinado, isto é, serão estimados seus hiperparâmetros que logo após será testado com o conjunto de dados de teste, ao qual não foram utilizados para o treinamento do modelo. Com base em alguma métrica estatística, o modelo treinado com o conjunto de dados de treinamento será avaliado considerando o conjunto de dados de teste, isto é, será avaliado a capacidade preditiva do modelo escolhido. Caso a capacidade preditiva esteja aceitável, por exemplo, se o erro preditivo for inferior à um determiado valor, finalizamos o trainamento do modelo, caso contrário, votamos aos passos iniciais, em que é possível melhorar os dados, enriquecer as features utilizadas na modelagem, aumentar a base de dados considerada ou mesmo trocar o algoritmo de aprendizagem de máquina.
+
+<br>
+
+#### Alguns materiais
+
+<br>
+
+- [**An Introduction to Statistical Learning**](https://www.statlearning.com/)
+
+- [**Hands-On Machine Learning with R**](https://bradleyboehmke.github.io/HOML/)
+
+- [**Tidy Modeling with R**](https://www.tmwr.org/)
+
+- [**Introduction to Data Science: Data Analysis and Prediction Algorithms with R**](http://rafalab.dfci.harvard.edu/dsbook/)
