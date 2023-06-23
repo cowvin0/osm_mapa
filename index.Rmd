@@ -157,6 +157,49 @@ mapa_palavras <- function(df, imovel = NULL, espectro = "metro_quadrado"){
     col = terrain.colors(length(freq$bairro) , alpha = 0.9) ,
     rot.per = 0.3)
 }
+
+plot_barra_bairro_valor_tipo <- function(df, destaques = TRUE, n = 20L){
+  df <- 
+    df |> 
+    dplyr::mutate(metro_quadrado = valor/area)
+  
+  if(destaques){
+    
+    bairros_mais_presentes <- 
+      df |> 
+      group_by(bairro) |>
+      summarise(n = n()) |> 
+      arrange(desc(n))
+    
+    df <- 
+      df |>
+      dplyr::filter(bairro %in% bairros_mais_presentes$bairro[1:n])
+    
+    if(n > nrow(df))
+      n <- nrow(df)
+  }
+  
+  df$bairro <- forcats::fct_reorder(df$bairro, df$metro_quadrado, .desc = FALSE)
+  
+  p <- ggplot(df) +
+    aes(x = bairro, y = metro_quadrado, fill = tipo) +
+    geom_col() +
+    scale_fill_hue(direction = 1) +
+    coord_flip() +
+    theme_minimal() +
+    ggtitle(
+      label = "Bairro versus metro quadrado",
+      subtitle = glue::glue("{n} bairro(s) com maior quantidade de registros")
+    ) + 
+    theme(axis.text = element_text(size = 12, face = "bold"))  +
+    labs(
+      x = "Valor do metro quadrado",
+      y = "Bairros",
+      fill = "Tipos de imóveis"
+    )
+  
+    plotly::ggplotly(p)
+}
 ```
 
 # Sobre {data-icon="fa-home"}
@@ -311,6 +354,20 @@ pickerInput(
 renderPlot({
   req(dataset())
   mapa_palavras(df = dataset(), imovel = input$tipoimovel, espectro = input$espectro)
+})
+```
+
+### `r fa("file-word", fill = "darkblack")`
+
+```{r}
+
+sliderInput("numerobairros", "Número de bairros:",
+    min = 2, max = 10, value = 5
+)
+
+renderPlotly({
+  req(dataset())
+  plot_barra_bairro_valor_tipo(df = dataset(), destaques = TRUE, n = input$numerobairros)
 })
 ```
 
